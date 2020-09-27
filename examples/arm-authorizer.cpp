@@ -84,7 +84,7 @@ static int msg_send(mavlink_message_t *msg)
 
 static void command_ack_send(mavlink_command_ack_t *ack)
 {
-    mavlink_message_t msg;
+    mavlink_message_t msg {};
     mavlink_msg_command_ack_encode(SYSTEM_ID, MAV_COMP_ID_ALL, &msg, ack);
     msg_send(&msg);
 }
@@ -131,12 +131,6 @@ static void handle_command_long(const mavlink_message_t *msg, mavlink_command_lo
     printf("Received request of authorization to arm target_system=%u\n", target_system);
 
     mavlink_command_ack_t ack = {};
-    ack.target_system = target_system;
-    ack.target_component = MAV_COMP_ID_ALL;
-    ack.command = MAV_CMD_ARM_AUTHORIZATION_REQUEST;
-    ack.result = MAV_RESULT_IN_PROGRESS;
-    ack.progress = 255;
-    ack.result_param2 = 0;
     command_ack_send(&ack);
 
     mavlink_mission_request_list_t count_req = {};
@@ -162,12 +156,6 @@ static void handle_mission_count(mavlink_mission_count_t *mission_count)
     if (!mission_count->count) {
         mavlink_command_ack_t ack = {};
 
-        ack.target_system = target_system;
-        ack.target_component = MAV_COMP_ID_ALL;
-        ack.command = MAV_CMD_ARM_AUTHORIZATION_REQUEST;
-        ack.result = MAV_RESULT_DENIED;
-        ack.progress = MAV_ARM_AUTH_DENIED_REASON_INVALID_WAYPOINT;
-        ack.result_param2 = 0;
         printf("Arm request denied because there is no mission loaded\n");
 
         command_ack_send(&ack);
@@ -208,21 +196,7 @@ static void handle_mission_item_int(mavlink_mission_item_int_t *mission_item)
     mission_item->seq++;
 
     if (mission_item->seq == mission_item_count) {
-        mavlink_command_ack_t ack;
-        ack.target_system = target_system;
-        ack.target_component = MAV_COMP_ID_ALL;
-        ack.command = MAV_CMD_ARM_AUTHORIZATION_REQUEST;
-        if (mission_valid) {
-            ack.result = MAV_RESULT_ACCEPTED;
-            ack.progress = 0;
-            ack.result_param2 = AUTHORIZATION_TIMEOUT_SEC;
-            printf("Arm request accepted\n");
-        } else {
-            ack.result = MAV_RESULT_DENIED;
-            ack.progress = MAV_ARM_AUTH_DENIED_REASON_INVALID_WAYPOINT;
-            ack.result_param2 = first_mission_item_invalid;
-            printf("Arm request denied\n");
-        }
+        mavlink_command_ack_t ack {};
         command_ack_send(&ack);
 
         mission_ack_send();
@@ -319,13 +293,7 @@ static void loop()
             if (timespec_compare(&now, &auth_request_timeout) > 0) {
                 printf("Arm authorizer timeout, last state was %u...\n", state);
 
-                mavlink_command_ack_t ack;
-                ack.target_system = target_system;
-                ack.target_component = MAV_COMP_ID_ALL;
-                ack.command = MAV_CMD_ARM_AUTHORIZATION_REQUEST;
-                ack.result = MAV_RESULT_FAILED;
-                ack.progress = MAV_ARM_AUTH_DENIED_REASON_TIMEOUT;
-                ack.result_param2 = 0;
+                mavlink_command_ack_t ack {};
 
                 command_ack_send(&ack);
 
