@@ -1,0 +1,10 @@
+[Unit]
+Description=MAVLink Router
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mavlink-routerd -c /root/mavlink-router/mavlink-router.conf
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

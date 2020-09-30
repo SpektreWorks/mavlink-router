@@ -12,8 +12,7 @@
 
 /aclocal.m4
 /autom4te.cache
-/build
-/build-aux/
+/build /build-aux/
 /config.h
 /config.h.in
 /config.log
@@ -25,7 +24,6 @@
 /mav.parm
 /mav.tlog
 /mav.tlog.raw
-/mavlink-router.service
 /perf.data
 /perf.data.old
 /px4-offboard-mode
